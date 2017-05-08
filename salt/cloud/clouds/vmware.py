@@ -4132,3 +4132,67 @@ def create_datastore_cluster(kwargs=None, call=None):
         return False
 
     return {datastore_cluster_name: 'created'}
+
+
+def convert_to_template(name, kwargs=None, call=None):
+    '''
+    To convert a VM to a template using its name
+
+    .. note::
+
+        If the VM is not powered off, it will fail to convert to template.
+        If you want to convert it to a template regardless of its power state,
+        set ``force=True``. Default is ``force=False``.
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt-cloud -a convert_to_template vmname [force=True]
+    '''
+    if call != 'action':
+        raise SaltCloudSystemExit(
+            'The start action must be called with '
+            '-a or --action.'
+        )
+
+    vm_properties = [
+        "name",
+        "config.template",
+        "summary.runtime.powerState"
+    ]
+
+    force = _str_to_bool(kwargs.get('force', False) if kwargs else False)
+    vm_list = salt.utils.vmware.get_mors_with_properties(_get_si(), vim.VirtualMachine, vm_properties)
+
+    for vm in vm_list:
+        if vm["name"] == name:
+            try:
+                if vm["config.template"] == True:
+                    ret = 'already marked as template'
+                    log.info('{0} {1}'.format(name, ret))
+                    return ret
+                if vm["summary.runtime.powerState"] != "poweredOff":
+                    if force:
+                        log.info('Powering Off VM {0}'.format(name))
+                        task = vm["object"].PowerOff()
+                        salt.utils.vmware.wait_for_task(task, name, 'power off')
+                    else:
+                        raise SaltCloudSystemExit(
+                            'Specified VM is not powered off. Specify force=True to '
+                            'forcefully power off the VM before the conversion'
+                        )
+                log.info('Converting VM {0} to template'.format(name))
+                vm["object"].MarkAsTemplate()
+            except Exception as exc:
+                log.error(
+                    'Error while converting VM {0} to template: {1}'.format(
+                        name,
+                        exc
+                    ),
+                    # Show the traceback if the debug logging level is enabled
+                    exc_info_on_loglevel=logging.DEBUG
+                )
+                return 'failed to convert to template'
+
+    return 'converted to template'
