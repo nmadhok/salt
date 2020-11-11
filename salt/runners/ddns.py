@@ -7,7 +7,7 @@ Dynamic DNS Runner
 
 Runner to interact with DNS server and create/delete/update DNS records
 
-:codeauthor: Nitin Madhok <nmadhok@clemson.edu>
+:codeauthor: Nitin Madhok <nmadhok@g.clemson.edu>
 
 """
 from __future__ import absolute_import, print_function, unicode_literals
