@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tests for salt.modules.zpool
 
@@ -9,8 +8,6 @@ Tests for salt.modules.zpool
 :platform:      illumos,freebsd,linux
 """
 
-# Import Python libs
-from __future__ import absolute_import, print_function, unicode_literals
 
 # Import Salt Utils
 import salt.loader
@@ -25,8 +22,6 @@ from tests.support.helpers import slowTest
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase, skipIf
-
-# Import Salt Testing libs
 from tests.support.zfs import ZFSMockData
 
 
